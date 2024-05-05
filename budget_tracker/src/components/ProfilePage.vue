@@ -32,65 +32,66 @@
     </div>
   </template>
   
-  <script>
-  import { auth, storage } from '@/firebase'; // Załóżmy, że korzystamy z Firebase Authentication i Firebase Storage
-  
-  export default {
-    name: 'ProfilePage',
-    data() {
-        return {
-            displayName: '', // Imię i nazwisko użytkownika
-            email: '', // Adres e-mail użytkownika
-            photoURL: '', // URL aktualnego zdjęcia profilowego
-            newPhoto: null // Nowe zdjęcie przesłane przez użytkownika
-        };
-    },
-    async created() {
-        // Pobranie bieżącego użytkownika (przy założeniu, że jesteśmy już uwierzytelnieni)
-        const user = auth.currentUser;
-        if (user) {
-            // Ustawienie danych użytkownika w formularzu
-            this.displayName = user.displayName || '';
-            this.email = user.email || '';
-            this.photoURL = user.photoURL || ''; // Ustawienie URL aktualnego zdjęcia profilowego
-        }
-    },
-    methods: {
-    async saveProfileChanges() {
-        try {
-        // Pobranie bieżącego użytkownika (przy założeniu, że jesteśmy już uwierzytelnieni)
-            const user = auth.currentUser;
+<script>
+    import { getStorage, ref, uploadBytes } from 'firebase/storage'; // Załóżmy, że korzystamy z Firebase Authentication i Firebase Storage
+    import { getAuth } from 'firebase/auth';
+
+    export default {
+        name: 'ProfilePage',
+        data() {
+            return {
+                displayName: '', // Imię i nazwisko użytkownika
+                email: '', // Adres e-mail użytkownika
+                photoURL: '', // URL aktualnego zdjęcia profilowego
+                newPhoto: null // Nowe zdjęcie przesłane przez użytkownika
+            };
+        },
+        async created() {
+            // Pobranie bieżącego użytkownika (przy założeniu, że jesteśmy już uwierzytelnieni)
+            const user = getAuth.currentUser;
             if (user) {
-                // Aktualizacja danych użytkownika
-                await user.updateProfile({
-                displayName: this.displayName // Aktualizacja imienia i nazwiska
-                });
-                // Aktualizacja zdjęcia profilowego, jeśli użytkownik wysłał nowe zdjęcie
-                if (this.newPhoto) {
-                    const storageRef = storage.ref();
-                    const photoRef = storageRef.child(`users/${user.uid}/profile.jpg`); // Ścieżka do zapisu zdjęcia w Storage
-                    await photoRef.put(this.newPhoto); // Przesłanie nowego zdjęcia do Storage
-                    const photoURL = await photoRef.getDownloadURL(); // Pobranie URL nowego zdjęcia
-                    await user.updateProfile({ photoURL: photoURL }); // Aktualizacja danych użytkownika w Firebase Authentication
-                }
-                // Powiadomienie użytkownika o zapisaniu zmian
-                alert('Zmiany w profilu zostały zapisane.');
+                // Ustawienie danych użytkownika w formularzu
+                this.displayName = user.displayName || '';
+                this.email = user.email || '';
+                this.photoURL = user.photoURL || ''; // Ustawienie URL aktualnego zdjęcia profilowego
             }
-        } catch (error) {
-        // Obsługa błędu zapisu zmian profilu
-            console.error('Błąd podczas zapisywania zmian profilu:', error);
-            alert('Wystąpił błąd podczas zapisywania zmian profilu. Spróbuj ponownie później.');
+        },
+        methods: {
+            async saveProfileChanges() {
+                try {
+                // Pobranie bieżącego użytkownika (przy założeniu, że jesteśmy już uwierzytelnieni)
+                    const user = getAuth.currentUser;
+                    if (user) {
+                        // Aktualizacja danych użytkownika
+                        await user.updateProfile({
+                        displayName: this.displayName // Aktualizacja imienia i nazwiska
+                        });
+                        // Aktualizacja zdjęcia profilowego, jeśli użytkownik wysłał nowe zdjęcie
+                        if (this.newPhoto) {
+                            const storageRef = ref(getStorage()); // Get the reference to the Firebase Storage
+                            const photoRef = ref(storageRef, `users/${user.uid}/profile.jpg`); // Path to save the photo in Storage
+                            await uploadBytes(photoRef, this.newPhoto); // Upload the new photo to Storage
+                            const photoURL = await ref.getDownloadURL(photoRef); // Get the URL of the new photo
+                            await user.updateProfile({ photoURL: photoURL }); // Update user data in Firebase Authentication
+                        }
+                        // Powiadomienie użytkownika o zapisaniu zmian
+                        alert('Zmiany w profilu zostały zapisane.');
+                    }
+                } catch (error) {
+                // Obsługa błędu zapisu zmian profilu
+                    console.error('Błąd podczas zapisywania zmian profilu:', error);
+                    alert('Wystąpił błąd podczas zapisywania zmian profilu. Spróbuj ponownie później.');
+                }
+            },
+            handleFileUpload(event) {
+                // Obsługa przesłania nowego zdjęcia przez użytkownika
+                this.newPhoto = event.target.files[0];
+            }
         }
-    },
-    handleFileUpload(event) {
-        // Obsługa przesłania nowego zdjęcia przez użytkownika
-        this.newPhoto = event.target.files[0];
-    }
-    }
-};
-  </script>
+    };
+</script>
   
-  <style scoped>
+<style scoped>
   /* Dodaj style dla strony profilu */
-  </style>
+</style>
   

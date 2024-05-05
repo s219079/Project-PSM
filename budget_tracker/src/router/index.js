@@ -4,6 +4,7 @@ import HomePage from '../components/HomePage.vue';
 import NewTransaction from '../components/NewTransaction.vue';
 import ProfilePage from '../components/ProfilePage.vue';
 import SettingsPage from '../components/SettingsPage.vue';
+import SignInSignUp from '../components/SignInSignUp.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -32,6 +33,11 @@ const router = createRouter({
           name: 'Settings Page',
           component: SettingsPage
         },
+        {
+          path: '/signin-signup',
+          name: 'Login Page',
+          component: SignInSignUp
+        }
       ]
     }
   ]

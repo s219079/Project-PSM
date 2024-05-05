@@ -1,7 +1,7 @@
 <template>
     <div class="main-layout">
         <HeaderCash :userBalance="userBalance" />
-        <router-view />
+        <router-view></router-view>
         <FooterMenu />
     </div>
 </template>

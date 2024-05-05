@@ -20,7 +20,8 @@
 
 <script>
 import { useRouter } from 'vue-router';
-import { auth } from '@/firebase';
+import { getAuth } from 'firebase/auth';
+import { updateNotificationSettings } from '@/firebase/firebase.js'; // Importuj funkcję zapisującą ustawienia powiadomień
 
 export default {
     name: 'SettingsPage',
@@ -46,7 +47,7 @@ export default {
         async logout() {
             try {
                 // Wylogowanie użytkownika
-                await auth.signOut(); // Wylogowanie z Firebase Authentication
+                await getAuth.signOut(); // Wylogowanie z Firebase Authentication
                 const router = useRouter();
                 // Po wylogowaniu przekieruj użytkownika na stronę logowania
                 router.push('/login');
