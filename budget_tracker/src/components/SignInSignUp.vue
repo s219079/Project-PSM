@@ -14,8 +14,12 @@
   
 <script>
     import { ref } from 'vue';
+	import { collection } from 'firebase/firestore';
+	import { getAuth } from 'firebase/auth';
+    import { db } from '../firebase/firebase';
+    import { defineComponent } from 'vue';
 
-    export default {
+    export default defineComponent({
         name: 'LoginForm',
         setup() {
             const email = ref('');
@@ -32,7 +36,16 @@
                 handleSubmit
             };
         }
-    };
+    });
+
+    const user = getAuth.currentUser;
+    if (user) {
+        const userId = user.uid;
+
+        // Utworzenie referencji do kolekcji transakcji użytkownika
+        const userTransactionsCollection = collection(db, userId);
+        console.log(userTransactionsCollection);
+    }
 </script>
   
 <style>

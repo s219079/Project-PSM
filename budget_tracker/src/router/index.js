@@ -7,40 +7,40 @@ import SettingsPage from '../components/SettingsPage.vue';
 import SignInSignUp from '../components/SignInSignUp.vue';
 
 const router = createRouter({
-  history: createWebHistory(),
-  routes: [
-    {
-      path: '/',
-      component: MainLayout,
-      children: [
-        {
-          path: '',
-          name: 'HomePage',
-          component: HomePage
-        },
-        {
-          path: '/new-transaction',
-          name: 'New Transaction',
-          component: NewTransaction
-        },
-        {
-          path: '/profile-page',
-          name: 'Profile Page',
-          component: ProfilePage
-        },
-        {
-          path: '/settings-page',
-          name: 'Settings Page',
-          component: SettingsPage
-        },
-        {
-          path: '/signin-signup',
-          name: 'Login Page',
-          component: SignInSignUp
-        }
-      ]
-    }
-  ]
+	history: createWebHistory(),
+	routes: [
+		{
+			path: '/signin-signup',
+			name: 'Login Page',
+			component: SignInSignUp
+		},
+		{
+			path: '/',
+			component: MainLayout,
+			children: [
+				{
+				path: '',
+				name: 'HomePage',
+				component: HomePage
+				},
+				{
+				path: '/new-transaction',
+				name: 'NewTransaction',
+				component: NewTransaction
+				},
+				{
+				path: '/profile-page',
+				name: 'ProfilePage',
+				component: ProfilePage
+				},
+				{
+				path: '/settings-page',
+				name: 'Settings Page',
+				component: SettingsPage
+				}
+			]
+		}
+	]
 });
 
 export default router;

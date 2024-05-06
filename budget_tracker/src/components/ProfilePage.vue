@@ -35,8 +35,10 @@
 <script>
     import { getStorage, ref, uploadBytes } from 'firebase/storage'; // Załóżmy, że korzystamy z Firebase Authentication i Firebase Storage
     import { getAuth } from 'firebase/auth';
+    import { getFirestore, doc, getDoc } from 'firebase/firestore';
+    import { defineComponent } from 'vue';
 
-    export default {
+    export default defineComponent({
         name: 'ProfilePage',
         data() {
             return {
@@ -51,8 +53,14 @@
             const user = getAuth.currentUser;
             if (user) {
                 // Ustawienie danych użytkownika w formularzu
+                const db = getFirestore();
+                const userDocRef = doc(db, 'users', user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    this.email = userData.email || '';
+                }
                 this.displayName = user.displayName || '';
-                this.email = user.email || '';
                 this.photoURL = user.photoURL || ''; // Ustawienie URL aktualnego zdjęcia profilowego
             }
         },
@@ -73,6 +81,7 @@
                             await uploadBytes(photoRef, this.newPhoto); // Upload the new photo to Storage
                             const photoURL = await ref.getDownloadURL(photoRef); // Get the URL of the new photo
                             await user.updateProfile({ photoURL: photoURL }); // Update user data in Firebase Authentication
+                            this.photoURL = photoURL;
                         }
                         // Powiadomienie użytkownika o zapisaniu zmian
                         alert('Zmiany w profilu zostały zapisane.');
@@ -88,7 +97,7 @@
                 this.newPhoto = event.target.files[0];
             }
         }
-    };
+    });
 </script>
   
 <style scoped>

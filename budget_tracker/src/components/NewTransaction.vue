@@ -36,16 +36,23 @@
 </template>
 
 <script>
-import { collection, addDoc, initializeFirestore } from 'firebase/firestore';
+import { collection, addDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'; // Dodaj import storage
-import { initializeApp } from 'firebase/app'; // Dodaj import initializeApp
-import { appFirebase } from '../main.js';
+import { db } from '../firebase/firebase';
+import { getAuth } from 'firebase/auth';
+import { defineComponent } from 'vue';
 
-export default {
+export default defineComponent({
     name: 'NewTransaction',
     data() {
         return {
-            categories: [],
+            categories: [
+                { id: 1, name: 'Jedzenie' },
+                { id: 2, name: 'Transport' },
+                { id: 3, name: 'Rozrywka' },
+                { id: 4, name: 'Zakupy' },
+                { id: 5, name: 'Inne' }
+            ],
             transactionType: '', // Typ transakcji
             amount: null,
             date: '',
@@ -53,18 +60,6 @@ export default {
             description: '',
             receiptImage: null
         };
-    },
-    created() {
-        const firebaseConfig = {
-            apiKey: "AIzaSyCGGF8s-eq99d4-WPS_greT54y17sHorFo",
-            authDomain: "project-psm-b0980.firebaseapp.com",
-            projectId: "project-psm-b0980",
-            storageBucket: "project-psm-b0980.appspot.com",
-            messagingSenderId: "166483875752",
-            appId: "1:166483875752:web:97c02ddf19977412ed2f9d"
-        };
-        const appFirebase = initializeApp(firebaseConfig);
-        this.db = initializeFirestore(appFirebase); // Przypisanie instancji Firestore do pola db
     },
     methods: {
         async addTransaction() {
@@ -92,8 +87,13 @@ export default {
                 // Pobierz adres URL przesłanego zdjęcia
                 imageUrl = await getDownloadURL(storageRef);
             }
-
             try {
+                const auth = getAuth(); // Pobieramy obiekt autentykacji
+                const user = auth.currentUser; // Pobieramy bieżącego użytkownika
+                if (!user) {
+                    throw new Error('Użytkownik niezalogowany');
+                }
+                const userId = user.uid;
                 // Przygotowanie danych transakcji
                 const transactionData = {
                     type: this.transactionType,
@@ -103,9 +103,9 @@ export default {
                     description: this.description,
                     receiptImage: imageUrl
                 };
-                const db = initializeFirestore(appFirebase);
+
                 // Dodanie transakcji do kolekcji 'transactions' w bazie danych Firestore
-                await addDoc(collection(db, 'transactions'), transactionData);
+                await addDoc(collection(db, `users/${userId}/transactions`), transactionData);
 
                 // Zresetowanie pól formularza po pomyślnym dodaniu transakcji
                 this.transactionType = '';
@@ -126,7 +126,7 @@ export default {
             }
         }
     }
-};
+});
 </script>
 
 <style scoped>
