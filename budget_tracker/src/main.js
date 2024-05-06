@@ -12,6 +12,7 @@ window.handleSignInSignUp = async (email, password) => {
         // Sprawdź, czy użytkownik istnieje
         const userCredential = await signInWithEmailAndPassword(email, password);
         console.log('Zalogowano:', userCredential.user);
+        router.push('/');
     } catch (error) {
         // Jeśli użytkownik nie istnieje, utwórz nowego
         if (error.code === 'auth/user-not-found') {

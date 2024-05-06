@@ -7,8 +7,8 @@
 </template>
 
 <script>
-    import HeaderCash from '@/components/HeaderCash.vue';
-    import FooterMenu from '@/components/FooterMenu.vue';
+    import HeaderCash from './HeaderCash.vue';
+    import FooterMenu from './FooterMenu.vue';
     import { defineComponent, ref, onMounted } from 'vue';
     import { collection, query, getDocs } from 'firebase/firestore';
     import { db, getCurrentUserId } from '../firebase/firebase';
