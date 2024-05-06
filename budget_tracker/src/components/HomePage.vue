@@ -1,17 +1,17 @@
 <template>
     <div class="cashflow">
         <h2>Miesięczne podsumowanie transakcji</h2>
-        <PieChart :data="chartData" :options="chartOptions" />
+        <!-- <PieChart :data="chartData" :options="chartOptions" /> -->
     </div>
 </template>
 
 <script>
-import PieChart from '@/components/PieChart.vue';
+//import PieChart from '@/components/PieChart.vue';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'HomePage',
-  components: {
+  /* components: {
     PieChart
   },
   setup() {
@@ -29,7 +29,7 @@ export default defineComponent({
         responsive: true
     };
     return { chartData, chartOptions };
-  }
+  }*/
 });
 </script>
 
