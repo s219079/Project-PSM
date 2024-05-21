@@ -6,12 +6,21 @@
         <p v-if="errMsg">{{ errMsg }}</p>
         <p><button @click="signIn">Submit</button></p>
         <p><button @click="signInWithGoogle">Sign In With Google</button></p>
+
+        <!-- Registration Form -->
+        <h2>Register an Account</h2>
+        <p><input type="text" placeholder="Email" v-model="registerEmail" /></p>
+        <p><input type="password" placeholder="Password" v-model="registerPassword" /></p>
+        <p><button @click="register">Register</button></p>
+
+        <!-- Logout Button -->
+        <button @click="signOut">Sign Out</button>
     </div>
 </template>
 
 <script>
 import { ref } from "vue";
-import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { useRouter } from 'vue-router';
 
 export default {
@@ -20,7 +29,10 @@ export default {
         const email = ref("");
         const password = ref("");
         const errMsg = ref("");
+        const registerEmail = ref("");
+        const registerPassword = ref("");
         const router = useRouter();
+        const auth = getAuth();
 
         const signIn = () => {
             const auth = getAuth();
@@ -63,12 +75,53 @@ export default {
                 });
         };
 
+        const register = () => {
+            createUserWithEmailAndPassword(auth, registerEmail.value, registerPassword.value)
+                .then((userCredential) => {
+                const user = userCredential.user;
+                console.log("Successfully registered and signed in!", user);
+                router.push("/");
+                })
+                .catch((error) => {
+                console.error(error.code);
+                switch (error.code) {
+                    case "auth/email-already-in-use":
+                    errMsg.value = "The email address is already in use by another account";
+                    break;
+                    case "auth/invalid-email":
+                    errMsg.value = "The email address is not valid";
+                    break;
+                    case "auth/weak-password":
+                    errMsg.value = "The password is too weak";
+                    break;
+                    default:
+                    errMsg.value = "Failed to register";
+                    break;
+                }
+                });
+            };
+
+        const signOutUser = () => {
+        signOut(auth)
+            .then(() => {
+            console.log("Successfully signed out!");
+            // Redirect or perform any other action after signing out
+            })
+            .catch((error) => {
+            console.error("Sign out error:", error);
+            });
+        };
+
         return {
             email,
             password,
             errMsg,
+            registerEmail,
+            registerPassword,
             signIn,
-            signInWithGoogle
+            signInWithGoogle,
+            register,
+            signOut: signOutUser
         };
     }
 };
