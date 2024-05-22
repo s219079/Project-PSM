@@ -1,8 +1,8 @@
 <template>
     <div class="main-layout">
-        <HeaderCash :userBalance="userBalance" />
+        <HeaderCash v-if="!isLoginPage" :userBalance="userBalance" />
         <router-view></router-view>
-        <FooterMenu />
+        <FooterMenu v-if="!isLoginPage"/>
     </div>
 </template>
 
@@ -12,6 +12,7 @@
     import { defineComponent, ref, onMounted } from 'vue';
     import { collection, query, getDocs } from 'firebase/firestore';
     import { db, getCurrentUserId } from '../firebase/firebase';
+    import { useRoute } from 'vue-router';
 
     export default defineComponent({
         name: 'MainLayout',
@@ -48,7 +49,10 @@
 
             onMounted(fetchTransactions);
 
-            return { userBalance };
+            const route = useRoute();
+            const isLoginPage = route.path === '/';
+
+            return { userBalance,  isLoginPage };
         }
     });
 </script>

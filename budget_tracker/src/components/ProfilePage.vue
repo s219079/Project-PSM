@@ -95,8 +95,8 @@
             handleFileUpload(event) {
                 // Obsługa przesłania nowego zdjęcia przez użytkownika
                 this.newPhoto = event.target.files[0];
-            }
-        }
+            },
+        },
     });
 </script>
   

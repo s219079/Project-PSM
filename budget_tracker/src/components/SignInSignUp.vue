@@ -12,9 +12,6 @@
         <p><input type="text" placeholder="Email" v-model="registerEmail" /></p>
         <p><input type="password" placeholder="Password" v-model="registerPassword" /></p>
         <p><button @click="register">Register</button></p>
-
-        <!-- Logout Button -->
-        <button @click="signOut">Sign Out</button>
     </div>
 </template>
 
@@ -40,7 +37,7 @@ export default {
                 .then((userCredential) => {
                     const user = userCredential.user;
                     console.log("Successfully signed in!", user);
-                    router.push("/");
+                    router.push("/main");
                 })
                 .catch((error) => {
                     console.error(error.code);
@@ -68,7 +65,7 @@ export default {
                 .then((result) => {
                     const user = result.user;
                     console.log("Successfully signed in with Google!", user);
-                    router.push("/");
+                    router.push("/main");
                 })
                 .catch((error) => {
                     console.error(error);
@@ -80,7 +77,7 @@ export default {
                 .then((userCredential) => {
                 const user = userCredential.user;
                 console.log("Successfully registered and signed in!", user);
-                router.push("/");
+                router.push("/main");
                 })
                 .catch((error) => {
                 console.error(error.code);
