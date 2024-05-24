@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore'; // Importuj instancję Firebase Firestore
 import { getAuth } from 'firebase/auth'; // Dodaj ten import
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
     apiKey: "AIzaSyCGGF8s-eq99d4-WPS_greT54y17sHorFo",
@@ -21,7 +22,9 @@ console.log("Firestore initialized:", db);
 
 const auth = getAuth(appFirebase);
 
-export { db, auth };
+const storage = getStorage(appFirebase);
+
+export { db, auth, storage };
 
 export default {
     install: (app) => {

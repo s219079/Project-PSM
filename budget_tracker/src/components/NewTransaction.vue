@@ -48,20 +48,37 @@ export default defineComponent({
         return {
             categories: [
                 { id: 1, name: 'Jedzenie' },
-                { id: 2, name: 'Transport' },
-                { id: 3, name: 'Rozrywka' },
-                { id: 4, name: 'Zakupy' },
-                { id: 5, name: 'Inne' }
+                { id: 2, name: 'Rozrywka' },
+                { id: 3, name: 'Transport' },
+                { id: 4, name: 'Zdrowie' },
+                { id: 5, name: 'Dom' },
+                { id: 6, name: 'Ubrania' },
+                { id: 7, name: 'Uroda' },
+                { id: 8, name: 'Edukacja' },
+                { id: 9, name: 'Prezent' },
+                { id: 10, name: 'Inne' },
+                
             ],
             transactionType: '', // Typ transakcji
             amount: null,
-            date: '',
+            date: this.getCurrentDate(),
             category: '',
             description: '',
             receiptImage: null
         };
     },
     methods: {
+        getCurrentDate() {
+            // Pobranie bieżącej daty w formacie YYYY-MM-DD
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // Miesiące są zero-indexowane
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        },
+        handleFileUpload(event) {
+            this.receiptImage = event.target.files[0];
+        },
         async addTransaction() {
             // Walidacja typu transakcji
             if (!this.transactionType) {
@@ -83,6 +100,7 @@ export default defineComponent({
                 const storage = getStorage(); // Uzyskanie instancji Firebase Storage
                 const storageRef = ref(storage, this.receiptImage.name); // Utworzenie referencji do pliku
                 await uploadBytes(storageRef, this.receiptImage); // Przesłanie danych binarnych do Firebase Storage
+
 
                 // Pobierz adres URL przesłanego zdjęcia
                 imageUrl = await getDownloadURL(storageRef);
@@ -130,5 +148,48 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* Dodaj style dla formularza */
+.new-transaction {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.new-transaction h2 {
+    text-align: center;
+    color: #333;
+}
+
+.new-transaction form {
+    display: flex;
+    flex-direction: column;
+}
+
+.new-transaction select,
+.new-transaction input,
+.new-transaction textarea {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.new-transaction button {
+    padding: 0.75rem;
+    font-size: 1rem;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.new-transaction button:hover {
+    background-color: #0056b3;
+}
 </style>
