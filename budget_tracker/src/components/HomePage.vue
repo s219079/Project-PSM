@@ -1,34 +1,39 @@
 <template>
-    <div class="cashflow">
-        <h2>Miesięczne podsumowanie transakcji</h2>
-        <!-- <PieChart :data="chartData" :options="chartOptions" /> -->
+    <div class="cashflow content">
+      <h2>Miesięczne podsumowanie transakcji</h2>
+      <div class="charts-container">
+        <div class="chart-wrapper">
+          <h3>Przychody:</h3>
+          <PieChart v-if="incomeTransactions.length" :data="incomeChartData" :options="chartOptions" />
+          <p v-else>Brak transakcji przychodów</p>
+        </div>
+        <div class="chart-wrapper">
+          <h3>Wydatki:</h3>
+          <PieChart v-if="expenseTransactions.length" :data="expenseChartData" :options="chartOptions" />
+          <p v-else>Brak transakcji wydatków</p>
+        </div>
+      </div>
+      <div class="transactions-container">
         <div>
-            <div class="chart-container">
-                <h3>Przychody:</h3>
-                <PieChart v-if="incomeTransactions.length" :data="incomeChartData" :options="chartOptions" />
-                <p v-else>Brak transakcji przychodów</p>
-            </div>
-            <ul>
-                <li v-for="transaction in incomeTransactions" :key="transaction.id">
-                {{ transaction.date }} - {{ transaction.amount }} - {{ transaction.category }}
-                </li>
-            </ul>
+          <h3>Przychody:</h3>
+          <ul>
+            <li v-for="transaction in incomeTransactions" :key="transaction.id">
+                {{ transaction.date }} {{ getCategoryName(transaction.category) }} {{ transaction.amount }}zł {{ transaction.description }}
+            </li>
+          </ul>
         </div>
         <div>
-            <div class="chart-container">
-                <h3>Wydatki:</h3>
-                <PieChart v-if="expenseTransactions.length" :data="expenseChartData" :options="chartOptions" />
-                <p v-else>Brak transakcji wydatków</p>
-            </div>
-            <ul>
-                <li v-for="transaction in expenseTransactions" :key="transaction.id">
-                {{ transaction.date }} - {{ transaction.amount }} - {{ transaction.category }}
-                </li>
-            </ul>
+          <h3>Wydatki:</h3>
+          <ul>
+            <li v-for="transaction in expenseTransactions" :key="transaction.id">
+                {{ transaction.date }} {{ getCategoryName(transaction.category) }} {{ transaction.amount }}zł {{ transaction.description }}
+            </li>
+          </ul>
         </div>
+      </div>
     </div>
-</template>
-
+  </template>
+  
 <script>
 import { defineComponent, ref, onMounted  } from 'vue';
 import { collection, getDocs } from "firebase/firestore";
@@ -61,6 +66,7 @@ export default defineComponent({
     const expenseChartData = ref({});
     const chartOptions = ref({
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: {
           position: 'top',
@@ -70,9 +76,39 @@ export default defineComponent({
           text: 'Podział według kategorii',
         },
       },
-      width: 5,
-        height: 5,
     });
+
+    const categoryColors = {
+      '1': '#FF6384',
+      '2': '#36A2EB',
+      '3': '#FFCE56',
+      '4': '#0477EB',
+      '5': '#74A3D6',
+      '6': '#C549D9',
+      '7': '#2AE0B3',
+      '8': '#2CE874',
+      '9': '#673574',
+      '10': '#D46552',
+      // dodaj więcej kategorii i kolorów
+    };
+
+    const categories = {
+      '1': 'Jedzenie',
+      '2': 'Rozrywka',
+      '3': 'Transport',
+      '4': 'Zdrowie',
+      '5': 'Dom',
+      '6': 'Ubrania',
+      '7': 'Uroda',
+      '8': 'Edukacja',
+      '9': 'Prezent',
+      '10': 'Inne',
+      // dodaj więcej kategorii
+    };
+
+    const getCategoryName = (categoryId) => {
+      return categories[categoryId] || categoryId;
+    };
 
     const fetchTransactions = async (userId) => {
         try {
@@ -99,22 +135,22 @@ export default defineComponent({
             expenseTransactions.value = expenses;
 
             incomeChartData.value = {
-                labels: Object.keys(incomeCategoryData),
+                labels: Object.keys(incomeCategoryData).map(getCategoryName),
                 datasets: [
                     {
                     label: 'Przychody',
-                    backgroundColor: Object.keys(incomeCategoryData).map(() => '#36A2EB'),
+                    backgroundColor: Object.keys(incomeCategoryData).map(category => categoryColors[category] || '#36A2EB'),
                     data: Object.values(incomeCategoryData),
                     },
                 ],
             };
 
             expenseChartData.value = {
-                labels: Object.keys(expenseCategoryData),
+                labels: Object.keys(expenseCategoryData).map(getCategoryName),
                 datasets: [
                     {
                     label: 'Wydatki',
-                    backgroundColor: Object.keys(expenseCategoryData).map(() => '#FF6384'),
+                    backgroundColor: Object.keys(expenseCategoryData).map(category => categoryColors[category] || '#FF6384'),
                     data: Object.values(expenseCategoryData),
                     },
                 ],
@@ -126,21 +162,70 @@ export default defineComponent({
 
 
             onMounted(() => {
-            const auth = getAuth();
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                fetchTransactions(user.uid);
+                const auth = getAuth();
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                    setTimeout(() => {
+                        fetchTransactions(user.uid);
+                    }, 300); // Opóźnienie, aby upewnić się, że komponenty są w pełni załadowane
                 }
             });
-    });
+        });
 
-        return { incomeTransactions, expenseTransactions, incomeChartData, expenseChartData, chartOptions };
+        return { incomeTransactions, expenseTransactions, incomeChartData, expenseChartData, chartOptions, getCategoryName  };
     }
 });
 </script>
 
 <style scoped>
-    .content {
-        padding: 20px;
-    }
+.content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.charts-container {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.chart-wrapper {
+  width: 45%; /* Adjust this percentage as needed */
+  max-width: 400px; /* Optional max-width */
+  height: 300px; /* Stała wysokość */
+  margin: 10px;
+  text-align: center;
+  position: relative;
+}
+
+.chart-wrapper h3 {
+  margin-bottom: 0;
+}
+
+.chart-wrapper canvas {
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
+
+.transactions-container {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.transactions-container > div {
+  width: 45%; /* Adjust this percentage as needed */
+  max-width: 400px; /* Optional max-width */
+  margin: 10px;
+}
+
+@media (max-width: 768px) {
+  .chart-wrapper, .transactions-container > div {
+    width: 100%;
+  }
+}
 </style>
