@@ -19,6 +19,8 @@
           <ul>
             <li v-for="transaction in incomeTransactions" :key="transaction.id">
                 {{ transaction.date }} {{ getCategoryName(transaction.category) }} {{ transaction.amount }}zł {{ transaction.description }}
+                <!-- <button @click="deleteTransaction(transaction.id, 'income')">Usuń</button> -->
+                
             </li>
           </ul>
         </div>
@@ -27,6 +29,7 @@
           <ul>
             <li v-for="transaction in expenseTransactions" :key="transaction.id">
                 {{ transaction.date }} {{ getCategoryName(transaction.category) }} {{ transaction.amount }}zł {{ transaction.description }}
+                <!-- <button @click="deleteTransaction(transaction.id, 'expense')">Usuń</button> -->
             </li>
           </ul>
         </div>
@@ -36,7 +39,7 @@
   
 <script>
 import { defineComponent, ref, onMounted  } from 'vue';
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import { db } from '../firebase/firebase';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { Pie } from 'vue-chartjs';
@@ -105,6 +108,19 @@ export default defineComponent({
       '10': 'Inne',
       // dodaj więcej kategorii
     };
+    const deleteTransaction = async (transactionId, type) => {
+      try {
+        await deleteDoc(doc(db, `users/${userId.value}/transactions`, transactionId));
+        if (type === 'income') {
+          incomeTransactions.value = incomeTransactions.value.filter(t => t.id !== transactionId);
+        } else if (type === 'expense') {
+          expenseTransactions.value = expenseTransactions.value.filter(t => t.id !== transactionId);
+        }
+        await fetchTransactions(userId.value); // Odśwież dane po usunięciu
+      } catch (error) {
+        console.error('Error deleting transaction:', error);
+      }
+    };
 
     const getCategoryName = (categoryId) => {
       return categories[categoryId] || categoryId;
@@ -160,6 +176,8 @@ export default defineComponent({
             }
             };
 
+            const userId = ref(null);
+
 
             onMounted(() => {
                 const auth = getAuth();
@@ -172,7 +190,7 @@ export default defineComponent({
             });
         });
 
-        return { incomeTransactions, expenseTransactions, incomeChartData, expenseChartData, chartOptions, getCategoryName  };
+        return { incomeTransactions, expenseTransactions, incomeChartData, expenseChartData, chartOptions, getCategoryName, deleteTransaction  };
     }
 });
 </script>
@@ -193,15 +211,16 @@ export default defineComponent({
 }
 
 .chart-wrapper {
-  width: 45%; /* Adjust this percentage as needed */
-  max-width: 400px; /* Optional max-width */
-  height: 300px; /* Stała wysokość */
+  width: 45%; 
+  max-width: 400px; 
+  height: 300px; 
   margin: 10px;
   text-align: center;
   position: relative;
 }
 
 .chart-wrapper h3 {
+    margin-top: 5px;
   margin-bottom: 0;
 }
 
@@ -218,8 +237,8 @@ export default defineComponent({
 }
 
 .transactions-container > div {
-  width: 45%; /* Adjust this percentage as needed */
-  max-width: 400px; /* Optional max-width */
+  width: 45%; 
+  max-width: 400px; 
   margin: 10px;
 }
 
