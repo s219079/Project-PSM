@@ -19,7 +19,7 @@
           <ul>
             <li v-for="transaction in incomeTransactions" :key="transaction.id">
                 {{ transaction.date }} {{ getCategoryName(transaction.category) }} {{ transaction.amount }}zł {{ transaction.description }}
-                <!-- <button @click="deleteTransaction(transaction.id, 'income')">Usuń</button> -->
+                <button @click="deleteTransaction(transaction.id, 'income')">Usuń</button>
                 
             </li>
           </ul>
@@ -29,7 +29,7 @@
           <ul>
             <li v-for="transaction in expenseTransactions" :key="transaction.id">
                 {{ transaction.date }} {{ getCategoryName(transaction.category) }} {{ transaction.amount }}zł {{ transaction.description }}
-                <!-- <button @click="deleteTransaction(transaction.id, 'expense')">Usuń</button> -->
+                <button @click="deleteTransaction(transaction.id, 'expense')">Usuń</button>
             </li>
           </ul>
         </div>
@@ -110,13 +110,20 @@ export default defineComponent({
     };
     const deleteTransaction = async (transactionId, type) => {
       try {
-        await deleteDoc(doc(db, `users/${userId.value}/transactions`, transactionId));
-        if (type === 'income') {
-          incomeTransactions.value = incomeTransactions.value.filter(t => t.id !== transactionId);
-        } else if (type === 'expense') {
-          expenseTransactions.value = expenseTransactions.value.filter(t => t.id !== transactionId);
+        const user = getAuth().currentUser;
+        if (user) {
+          const userId = user.uid;
+          await deleteDoc(doc(db, `users/${userId}/transactions`, transactionId));
+          
+          if (type === 'income') {
+            incomeTransactions.value = incomeTransactions.value.filter(t => t.id !== transactionId);
+          } else if (type === 'expense') {
+            expenseTransactions.value = expenseTransactions.value.filter(t => t.id !== transactionId);
+          }
+
+          // Odśwież dane po usunięciu
+          await fetchTransactions(userId);
         }
-        await fetchTransactions(userId.value); // Odśwież dane po usunięciu
       } catch (error) {
         console.error('Error deleting transaction:', error);
       }
@@ -175,8 +182,6 @@ export default defineComponent({
                 console.error('Error fetching transactions:', error);
             }
             };
-
-            const userId = ref(null);
 
 
             onMounted(() => {
