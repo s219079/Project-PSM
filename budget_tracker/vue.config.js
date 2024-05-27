@@ -17,5 +17,16 @@ module.exports = defineConfig({
       ]
     }
   },
-  publicPath: process.env.NODE_ENV === 'production' ? '/Project-PSM/' : '/'
+  publicPath: process.env.NODE_ENV === 'production' ? '/Project-PSM/' : '/',
+  pwa: {
+    name: 'My App',
+    themeColor: '#4DBA87',
+    msTileColor: '#000000',
+    appleMobileWebAppCapable: 'yes',
+    appleMobileWebAppStatusBarStyle: 'black',
+    workboxOptions: {
+      skipWaiting: true,
+      clientsClaim: true,
+    }
+  }
 });
