@@ -28,6 +28,5 @@ module.exports = defineConfig({
       skipWaiting: true,
       clientsClaim: true,
     }
-  },
-  publicPath: process.env.NODE_ENV === 'production' ? '/Project-PSM/' : '/'
+  }
 });
